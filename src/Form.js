@@ -17,7 +17,11 @@ const MyTextInput = ({label, ...props}) => {
 
 const CustomForm = () => {
 
-    return (
+
+
+
+        return (
+
         <Formik
             initialValues = {{
                 name: '',
@@ -29,7 +33,7 @@ const CustomForm = () => {
         }}
 
             validationSchema = {Yup.object({
-                name: Yup.string()
+                    name: Yup.string()
                     .min(2, 'Поле должно содержать более 2 символов!')
                     .required('Обязательное поле'),
                     email: Yup.string()
@@ -47,7 +51,31 @@ const CustomForm = () => {
                     .oneOf([true], 'Необходимо согласие'),
 
         })}
-            onSubmit = {values => console.log(JSON.stringify(values, null, 2))}
+            onSubmit = {(values) =>  {
+                values.addEventListener('submit', e => {
+                    e.preventDefault();
+
+                    const request = new XMLHttpRequest();
+                    request.open('POST', 'server.php');
+
+                    const formData = new FormData(e);
+                    request.send(formData);
+
+                    request.addEventListener('load', () => {
+                        if( request.status === 200) {
+                            alert('Форма успешно отправленна!')
+                            e.reset();
+                        } else{
+                            alert("Что-то пошло не так...")
+                        }
+                    })
+                    return formData;
+                })
+
+
+            }
+            }
+
 
         >
 
@@ -58,6 +86,7 @@ const CustomForm = () => {
                                 id="name"
                                 name="name"
                                 type="text"
+
                         />
 
                         <MyTextInput
@@ -71,8 +100,9 @@ const CustomForm = () => {
                         <Field
                             id="phone"
                             name="phone"
-                            type="number"
-                            placeholder='+7 (ААА) ХХХ-ХХ-ХХ'
+                            type="tel"
+                            pattern='\+7\s?[\(]{0,1}9[0-9]{2}[\)]{0,1}\s?\d{3}[-]{0,1}\d{2}[-]{0,1}\d{2}'
+                            placeholder='+7 (999) 999-99-99'
                         />
                         <ErrorMessage name='phone' className='error' component='div'/>
                         <label htmlFor="date">Дата рождения</label>
